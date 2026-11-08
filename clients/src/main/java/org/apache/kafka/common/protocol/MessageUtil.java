@@ -29,6 +29,11 @@ import java.util.List;
 
 
 public final class MessageUtil {
+
+    public static final int MAX_PREALLOCATED_ARRAY_CAPACITY = 1000;
+
+    public static final int MAX_ARRAY_LENGTH = 1_000_000;
+
     /**
      * Copy a byte buffer into an array.  This will not affect the buffer's
      * position or mark.
