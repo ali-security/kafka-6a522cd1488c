@@ -116,6 +116,25 @@ public class MessageDataGeneratorTest {
     }
 
     @Test
+    public void testTaggedFieldCountIsBounded() throws Exception {
+        MessageSpec spec = parseSpec(
+                "{",
+                "  \"type\": \"request\", \"name\": \"TagBoundTest\", \"validVersions\": \"0-1\", \"flexibleVersions\": \"1+\",",
+                "  \"fields\": [",
+                "    { \"name\": \"Foo\", \"type\": \"int32\", \"versions\": \"1+\", \"taggedVersions\": \"1+\", \"tag\": 0, \"default\": \"0\" }",
+                "  ]",
+                "}");
+        String source = generateMessageSource(spec);
+        assertStringContains("if (_numTaggedFields < 0) {", source);
+        assertStringContains("if (_numTaggedFields > _readable.remaining()) {", source);
+        assertStringContains("Tried to read \" + _numTaggedFields + \" tagged fields, but there are only \" + " +
+                "_readable.remaining() + \" bytes remaining.", source);
+        assertStringContains("if (_numTaggedFields > MessageUtil.MAX_TAGGED_FIELD_COUNT) {", source);
+        assertStringContains("Tried to read \" + _numTaggedFields + \" tagged fields, which exceeds the maximum " +
+                "allowed count of \" + MessageUtil.MAX_TAGGED_FIELD_COUNT + \".\"", source);
+    }
+
+    @Test
     public void testInvalidNullDefaultForInt() throws Exception {
         MessageSpec testMessageSpec = MessageGenerator.JSON_SERDE.readValue(String.join("", Arrays.asList(
             "{",
